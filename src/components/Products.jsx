@@ -1,11 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { addCart } from "../redux/action";
+import {
+  Box,
+  Button,
+  Grid,
+  Card,
+  CardMedia,
+  CardHeader,
+  CardActions,
+  CardContent,
+  InputLabel,
+  Typography,
+  Select,
+  MenuItem,
+} from "@mui/material";
 
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const Products = () => {
@@ -24,9 +37,19 @@ const Products = () => {
     const getProducts = async () => {
       setLoading(true);
       const response = await fetch("https://fakestoreapi.com/products/");
+      // add qty property to each product with random value between 1 and 10
+      const mockDataWithQty = await response
+        .clone()
+        .json()
+        .then((data) =>
+          data.map((item) => ({
+            ...item,
+            qty: Math.floor(Math.random() * 10) + 1,
+          }))
+        );
       if (componentMounted) {
         setData(await response.clone().json());
-        setFilter(await response.json());
+        setFilter(mockDataWithQty);
         setLoading(false);
       }
 
@@ -106,55 +129,82 @@ const Products = () => {
             Electronics
           </button>
         </div>
-
-        {filter.map((product) => {
-          return (
-            <div
-              id={product.id}
-              key={product.id}
-              className="col-md-4 col-sm-6 col-xs-8 col-12 mb-4"
-            >
-              <div className="card text-center h-100" key={product.id}>
-                <img
-                  className="card-img-top p-3"
-                  src={product.image}
-                  alt="Card"
-                  height={300}
-                />
-                <div className="card-body">
-                  <h5 className="card-title">
-                    {product.title.substring(0, 12)}...
-                  </h5>
-                  <p className="card-text">
-                    {product.description.substring(0, 90)}...
-                  </p>
-                </div>
-                <ul className="list-group list-group-flush">
-                  <li className="list-group-item lead">$ {product.price}</li>
-                  {/* <li className="list-group-item">Dapibus ac facilisis in</li>
-                    <li className="list-group-item">Vestibulum at eros</li> */}
-                </ul>
-                <div className="card-body">
-                  <Link
-                    to={"/product/" + product.id}
-                    className="btn btn-dark m-1"
-                  >
-                    Buy Now
-                  </Link>
-                  <button
-                    className="btn btn-dark m-1"
-                    onClick={() => {
-                      toast.success("Added to cart");
-                      addProduct(product);
+        <Grid container spacing={1} columns={{ xs: 2, sm: 4 }}>
+          {filter.map((product) => {
+            const outOfStock = product.qty === 0;
+            return (
+              <Grid item xs={2} sm={4} key={`${product.id} - ${product.title}`}>
+                <Card
+                  sx={{
+                    width: 250,
+                    height: 600,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    p: 1,
+                  }}
+                >
+                  <CardHeader
+                    title={product.title}
+                    component="h6"
+                    sx={{ "& .MuiTypography-root": { fontSize: "18px" } }}
+                  />
+                  <CardMedia
+                    component="img"
+                    src={product.image}
+                    sx={{
+                      objectFit: "contain",
+                      maxHeight: "200px",
+                      width: "80%",
+                    }}
+                  ></CardMedia>
+                  <CardContent
+                    sx={{
+                      display: "flex",
+                      width: "100%",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
                   >
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+                    <Box>
+                      <InputLabel>Options</InputLabel>
+                      <Select
+                        label="Options"
+                        onChange={() => {}}
+                        sx={{ width: "100px" }}
+                      >
+                        <MenuItem value={1}>Option 1</MenuItem>
+                        <MenuItem value={2}>Option 2</MenuItem>
+                        <MenuItem value={3}>Option 3</MenuItem>
+                      </Select>
+                    </Box>
+                    <Typography variant="body1" color="text.secondary">
+                      {`$${product.price}`}
+                    </Typography>
+                  </CardContent>
+                  {!outOfStock ? (
+                    <CardActions>
+                      <Button
+                        onClick={() => {
+                          toast.success("Added to cart");
+                          addProduct(product);
+                        }}
+                      >
+                        Add to Cart
+                      </Button>
+                    </CardActions>
+                  ) : (
+                    <Typography variant="body2" color="error">
+                      Out of Stock
+                    </Typography>
+                  )}
+                </Card>
+              </Grid>
+            );
+          })}
+        </Grid>
       </>
     );
   };
