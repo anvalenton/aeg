@@ -2,7 +2,6 @@
   "name": "ecommerce",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://anvalenton.github.io/aeg",
   "dependencies": {
     "@mui/material": "^7.2.0",
     "@reduxjs/toolkit": "^1.8.5",
@@ -61,9 +60,16 @@
     "client": "react-scripts --openssl-legacy-provider start",
     "build": "react-scripts --openssl-legacy-provider build",
     "test": "react-scripts eject",
-    "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "eject": "react-scripts eject"
+  },
+    "overrides": {
+    "react-chartist": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    },
+    "@mui/icons-material": {
+      "@mui/material": "$@mui/material"
+    }
   },
   "eslintConfig": {
     "extends": [
